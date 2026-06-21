@@ -107,6 +107,9 @@ class FlowGuardClient:
             last_run_status=payload.get("last_run_status"),
         )
 
+    def get_pipeline_failures(self) -> dict[str, int]:
+        return self._get("/pipeline-failures")
+
     def get_pipeline_runs(self, pipeline_id: int) -> list[PipelineRun]:
         payload = self._get(f"/pipeline-runs/{pipeline_id}")
         return [

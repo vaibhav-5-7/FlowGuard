@@ -3,6 +3,7 @@ from typing import Any
 
 from fastapi import FastAPI
 
+from app.api.pipeline_failures import router as pipeline_failures_router
 from app.api.pipeline_health import router as pipeline_health_router
 from app.api.pipeline_runs import router as pipeline_runs_router
 from app.api.pipelines import router as pipelines_router
@@ -20,6 +21,10 @@ OPENAPI_TAGS = [
     {
         "name": "pipeline-health",
         "description": "Aggregate health metrics for pipelines based on run history.",
+    },
+    {
+        "name": "pipeline-failures",
+        "description": "Aggregate failure counts by error message across pipeline runs.",
     },
 ]
 
@@ -41,6 +46,7 @@ app = FastAPI(
 app.include_router(pipelines_router)
 app.include_router(pipeline_runs_router)
 app.include_router(pipeline_health_router)
+app.include_router(pipeline_failures_router)
 
 
 @app.get("/")

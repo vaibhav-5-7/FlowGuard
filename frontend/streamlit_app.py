@@ -195,6 +195,68 @@ def _runs_to_dataframe(runs: list[PipelineRun]) -> pd.DataFrame:
 
 
 @st.cache_data(ttl=30, show_spinner=False)
+def _load_failure_analytics(api_base_url: str) -> dict[str, int]:
+    client = FlowGuardClient(base_url=api_base_url)
+    return client.get_pipeline_failures()
+
+
+def _failure_reasons_to_dataframe(failures: dict[str, int]) -> pd.DataFrame:
+    rows = [
+        {"Error Message": error_message, "Count": count}
+        for error_message, count in failures.items()
+    ]
+    return pd.DataFrame(rows)
+
+
+def render_top_failure_reasons(failures: dict[str, int]) -> None:
+    st.subheader("Top Failure Reasons")
+
+    if not failures:
+        st.info("No failure error messages recorded yet.")
+        st.plotly_chart(
+            _empty_chart_figure(
+                "Top Failure Reasons",
+                "No failure error messages recorded yet.",
+            ),
+            use_container_width=True,
+        )
+        return
+
+    failures_df = _failure_reasons_to_dataframe(failures)
+    st.dataframe(
+        failures_df,
+        use_container_width=True,
+        hide_index=True,
+    )
+
+    error_messages = list(failures.keys())
+    counts = list(failures.values())
+
+    fig = go.Figure(
+        data=[
+            go.Bar(
+                x=error_messages,
+                y=counts,
+                marker_color=COLOR_FAILED,
+                text=counts,
+                textposition="outside",
+                hovertemplate="%{x}<br>Count: %{y}<extra></extra>",
+            )
+        ]
+    )
+    fig.update_layout(
+        title="Top Failure Reasons",
+        xaxis_title="Error Message",
+        yaxis_title="Count",
+        height=CHART_HEIGHT,
+        showlegend=False,
+        margin={"t": 50, "b": 40, "l": 40, "r": 20},
+        yaxis={"rangemode": "tozero"},
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+
+@st.cache_data(ttl=30, show_spinner=False)
 def _load_pipeline_details(
     api_base_url: str,
     pipeline_id: int,
@@ -471,6 +533,7 @@ def main() -> None:
         if st.button("Refresh", type="primary"):
             _load_dashboard_data.clear()
             _load_pipeline_details.clear()
+            _load_failure_analytics.clear()
 
     try:
         summary, health_records, fetch_errors, pipeline_names = _load_dashboard_data(
@@ -496,6 +559,14 @@ def main() -> None:
     render_success_vs_failed_chart(summary)
     render_summary_metrics(summary)
     render_pipeline_success_rate_chart(health_records)
+
+    try:
+        failure_analytics = _load_failure_analytics(API_BASE_URL)
+    except FlowGuardAPIError as exc:
+        st.error(f"Unable to load failure analytics: {exc}")
+        failure_analytics = {}
+
+    render_top_failure_reasons(failure_analytics)
 
     st.subheader("Pipeline Health Overview")
     render_pipeline_table(health_records)
