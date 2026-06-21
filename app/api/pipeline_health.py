@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models.pipeline import Pipeline, PipelineRun
 from app.schemas.pipeline_health import PipelineHealthResponse
+from app.services.alert_service import create_health_alerts
 
 router = APIRouter(prefix="/pipeline-health", tags=["pipeline-health"])
 
@@ -72,4 +73,11 @@ def get_pipeline_health(
         .all()
     )
 
-    return _calculate_health_metrics(pipeline_id, runs)
+    health = _calculate_health_metrics(pipeline_id, runs)
+    create_health_alerts(
+        db,
+        pipeline_id=pipeline_id,
+        success_rate=health.success_rate,
+        total_runs=health.total_runs,
+    )
+    return health

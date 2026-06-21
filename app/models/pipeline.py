@@ -22,6 +22,10 @@ class Pipeline(Base):
         back_populates="pipeline",
         cascade="all, delete-orphan",
     )
+    alerts: Mapped[list["Alert"]] = relationship(
+        back_populates="pipeline",
+        cascade="all, delete-orphan",
+    )
 
 
 class PipelineRun(Base):
