@@ -46,6 +46,7 @@ class PipelineHealth:
     success_rate: float
     avg_duration_seconds: float
     last_run_status: str | None
+    last_run_timestamp: datetime | None
 
 
 @dataclass(frozen=True)
@@ -105,6 +106,11 @@ class FlowGuardClient:
             success_rate=payload["success_rate"],
             avg_duration_seconds=payload["avg_duration_seconds"],
             last_run_status=payload.get("last_run_status"),
+            last_run_timestamp=(
+                _parse_timestamp(payload["last_run_timestamp"])
+                if payload.get("last_run_timestamp")
+                else None
+            ),
         )
 
     def get_pipeline_failures(self) -> dict[str, int]:

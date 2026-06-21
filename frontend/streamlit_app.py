@@ -103,6 +103,7 @@ def _health_to_dataframe(health_records: list[PipelineHealth]) -> pd.DataFrame:
             "Health": _success_rate_health(record.total_runs, record.success_rate),
             "Average Duration": _format_duration(record.avg_duration_seconds),
             "Last Status": _format_last_status(record.last_run_status),
+            "Last Run": _format_run_timestamp(record.last_run_timestamp),
         }
         for record in health_records
     ]
@@ -293,7 +294,7 @@ def render_pipeline_details(
         st.error(f"Unable to load pipeline details: {exc}")
         return
 
-    col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2, col3, col4, col5, col6 = st.columns(6)
 
     col1.metric("Pipeline ID", health.pipeline_id)
     col2.metric("Total Runs", health.total_runs)
@@ -311,6 +312,7 @@ def render_pipeline_details(
             _format_status_html(health.last_run_status),
             unsafe_allow_html=True,
         )
+    col6.metric("Last Run", _format_run_timestamp(health.last_run_timestamp))
 
     st.markdown("#### Run History")
 
