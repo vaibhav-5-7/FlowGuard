@@ -3,8 +3,25 @@ from typing import Any
 
 from fastapi import FastAPI
 
+from app.api.pipeline_health import router as pipeline_health_router
+from app.api.pipeline_runs import router as pipeline_runs_router
 from app.api.pipelines import router as pipelines_router
 from app.db.database import create_tables
+
+OPENAPI_TAGS = [
+    {
+        "name": "pipelines",
+        "description": "Create and list data pipelines.",
+    },
+    {
+        "name": "pipeline-runs",
+        "description": "Track pipeline execution runs, including status, duration, and errors.",
+    },
+    {
+        "name": "pipeline-health",
+        "description": "Aggregate health metrics for pipelines based on run history.",
+    },
+]
 
 
 @asynccontextmanager
@@ -13,9 +30,17 @@ async def lifespan(_: FastAPI) -> Any:
     yield
 
 
-app = FastAPI(title="FlowGuard", version="0.1.0", lifespan=lifespan)
+app = FastAPI(
+    title="FlowGuard",
+    version="0.1.0",
+    description="API for managing data pipelines and tracking pipeline run history.",
+    lifespan=lifespan,
+    openapi_tags=OPENAPI_TAGS,
+)
 
 app.include_router(pipelines_router)
+app.include_router(pipeline_runs_router)
+app.include_router(pipeline_health_router)
 
 
 @app.get("/")
