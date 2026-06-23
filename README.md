@@ -41,8 +41,30 @@ It helps Data Engineers monitor pipeline executions, track failures, analyze pip
 ---
 
 ## Architecture
+## Architecture
 
-```text
+```mermaid
+flowchart TD
+
+    A[Airflow / AWS Glue / Lambda]
+    B[FlowGuard FastAPI Backend]
+    C[(SQLite Database)]
+    D[Streamlit Dashboard]
+    E[Pipeline Health Metrics]
+    F[Failure Analytics]
+    G[Alerts]
+
+    A --> B
+    B --> C
+    C --> B
+    B --> D
+
+    D --> E
+    D --> F
+    D --> G
+```
+
+<!-- ```text
 ┌─────────────┐
 │ Streamlit   │
 │ Dashboard   │
@@ -58,7 +80,7 @@ It helps Data Engineers monitor pipeline executions, track failures, analyze pip
 ┌─────────────┐
 │ SQLite DB   │
 └─────────────┘
-```
+``` -->
 
 ---
 
