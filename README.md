@@ -41,8 +41,6 @@ It helps Data Engineers monitor pipeline executions, track failures, analyze pip
 ---
 
 ## Architecture
-## Architecture
-
 ```mermaid
 flowchart TD
 
