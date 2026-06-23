@@ -1,5 +1,19 @@
 # FlowGuard
 
+## Live Demo
+
+### Frontend
+
+https://YOUR-STREAMLIT-URL.streamlit.app
+
+### Backend API
+
+https://flowguard-api-o6xo.onrender.com
+
+### Swagger Documentation
+
+https://flowguard-api-o6xo.onrender.com/docs
+
 FlowGuard is a Data Pipeline Health Monitoring Platform built using FastAPI, Streamlit, SQLite, and Plotly.
 
 It helps Data Engineers monitor pipeline executions, track failures, analyze pipeline health, and visualize operational metrics through an interactive dashboard.
