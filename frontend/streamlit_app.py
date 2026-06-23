@@ -555,6 +555,124 @@ def main() -> None:
             + "\n".join(f"- {error}" for error in fetch_errors)
         )
 
+    # Show success messages persisted across reruns (set before rerun)
+# Success notifications
+    if "pipeline_created_success" in st.session_state:
+        st.success("✅ Pipeline created successfully")
+        del st.session_state["pipeline_created_success"]
+
+    if "pipeline_run_created_success" in st.session_state:
+        st.success("✅ Pipeline run created successfully")
+        del st.session_state["pipeline_run_created_success"]
+
+    st.subheader("Create New Resources")
+    create_col, run_col = st.columns(2)
+
+    with create_col:
+        with st.expander("Create Pipeline", expanded=True):
+            with st.form("create_pipeline_form"):
+                pipeline_name = st.text_input("Pipeline Name")
+                pipeline_description = st.text_area(
+                    "Description",
+                    help="Optional pipeline description.",
+                    height=120,
+                )
+                submitted_pipeline = st.form_submit_button("Create Pipeline")
+
+            if submitted_pipeline:
+                if not pipeline_name.strip():
+                    st.warning("Please enter a pipeline name.")
+                else:
+                    try:
+                        FlowGuardClient(base_url=API_BASE_URL).create_pipeline(
+                            name=pipeline_name.strip(),
+                            description=(
+                                pipeline_description.strip()
+                                if pipeline_description
+                                else None
+                            ),
+                        )
+                        # _load_dashboard_data.clear()
+                        # _load_pipeline_details.clear()
+                        # _load_failure_analytics.clear()
+                        # # Display immediate success and persist a flag for visibility after rerun
+                        # st.success("Pipeline created successfully")
+                        # st.session_state["pipeline_created_success"] = True
+                        # st.rerun()
+                        _load_dashboard_data.clear()
+                        _load_pipeline_details.clear()
+                        _load_failure_analytics.clear()
+
+                        st.session_state["pipeline_created_success"] = True
+                        st.rerun()
+                    except FlowGuardAPIError as exc:
+                        st.error(f"Unable to create pipeline: {exc}")
+
+    with run_col:
+        with st.expander("Create Pipeline Run", expanded=True):
+            if not pipeline_names:
+                st.info("Create a pipeline first before reporting runs.")
+            else:
+                pipeline_ids = sorted(pipeline_names.keys())
+                with st.form("create_pipeline_run_form"):
+                    selected_pipeline_id = st.selectbox(
+                        "Pipeline",
+                        options=pipeline_ids,
+                        format_func=lambda pipeline_id: _pipeline_label(
+                            pipeline_id,
+                            pipeline_names,
+                        ),
+                    )
+                    run_status = st.selectbox(
+                        "Status",
+                        options=[
+                            "SUCCESS",
+                            "FAILED",
+                            "OK",
+                            "ERROR",
+                            "WARNING",
+                            "COMPLETED",
+                        ],
+                    )
+                    duration_seconds = st.number_input(
+                        "Duration Seconds",
+                        min_value=0.0,
+                        value=0.0,
+                        step=1.0,
+                        help="Set the run duration in seconds.",
+                    )
+                    error_message = st.text_area(
+                        "Error Message (optional)",
+                        height=100,
+                    )
+                    submitted_run = st.form_submit_button("Create Pipeline Run")
+
+                if submitted_run:
+                    try:
+                        FlowGuardClient(base_url=API_BASE_URL).create_pipeline_run(
+                            pipeline_id=selected_pipeline_id,
+                            status=run_status.strip(),
+                            duration_seconds=duration_seconds,
+                            error_message=(
+                                error_message.strip() if error_message else None
+                            ),
+                        )
+                        # _load_dashboard_data.clear()
+                        # _load_pipeline_details.clear()
+                        # _load_failure_analytics.clear()
+                        # # Display immediate success and persist a flag for visibility after rerun
+                        # st.success("Pipeline run created successfully")
+                        # st.session_state["pipeline_run_created_success"] = True
+                        # st.rerun()
+                        _load_dashboard_data.clear()
+                        _load_pipeline_details.clear()
+                        _load_failure_analytics.clear()
+
+                        st.session_state["pipeline_run_created_success"] = True
+                        st.rerun()
+                    except FlowGuardAPIError as exc:
+                        st.error(f"Unable to create pipeline run: {exc}")
+
     pipeline_alerts = _build_pipeline_alerts(health_records, pipeline_names)
     render_pipeline_alerts(pipeline_alerts)
 

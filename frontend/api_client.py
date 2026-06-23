@@ -93,8 +93,56 @@ class FlowGuardClient:
 
         return response.json()
 
+    def _post(self, path: str, payload: dict[str, Any]) -> Any:
+        url = f"{self.base_url}{path}"
+        try:
+            response = requests.post(url, json=payload, timeout=self.timeout)
+        except requests.ConnectionError as exc:
+            raise FlowGuardAPIError(
+                f"Unable to connect to FlowGuard API at {self.base_url}. "
+                "Ensure the backend is running."
+            ) from exc
+        except requests.Timeout as exc:
+            raise FlowGuardAPIError(
+                f"Request to {url} timed out after {self.timeout}s."
+            ) from exc
+        except requests.RequestException as exc:
+            raise FlowGuardAPIError(f"Request to {url} failed: {exc}") from exc
+
+        if response.status_code >= 400:
+            detail = response.text.strip() or response.reason
+            raise FlowGuardAPIError(
+                f"API error ({response.status_code}): {detail}",
+                status_code=response.status_code,
+            )
+
+        return response.json()
+
     def list_pipelines(self) -> list[dict[str, Any]]:
         return self._get("/pipelines")
+
+    def create_pipeline(
+        self,
+        name: str,
+        description: str | None = None,
+    ) -> dict[str, Any]:
+        payload = {"name": name, "description": description}
+        return self._post("/pipelines", payload)
+
+    def create_pipeline_run(
+        self,
+        pipeline_id: int,
+        status: str,
+        duration_seconds: float | None = None,
+        error_message: str | None = None,
+    ) -> dict[str, Any]:
+        payload = {
+            "pipeline_id": pipeline_id,
+            "status": status,
+            "duration_seconds": duration_seconds,
+            "error_message": error_message,
+        }
+        return self._post("/pipeline-runs", payload)
 
     def get_pipeline_health(self, pipeline_id: int) -> PipelineHealth:
         payload = self._get(f"/pipeline-health/{pipeline_id}")
