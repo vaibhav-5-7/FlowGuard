@@ -1,5 +1,9 @@
 import os
 
-DEFAULT_API_BASE_URL = "http://127.0.0.1:8000"
+# DEFAULT_API_BASE_URL = "http://127.0.0.1:8000"
+# API_BASE_URL = os.getenv("FLOWGUARD_API_URL", DEFAULT_API_BASE_URL).rstrip("/")
+# REQUEST_TIMEOUT_SECONDS = int(os.getenv("FLOWGUARD_REQUEST_TIMEOUT", "10"))
+
+DEFAULT_API_BASE_URL = "https://flowguard-api-o6xo.onrender.com"
 API_BASE_URL = os.getenv("FLOWGUARD_API_URL", DEFAULT_API_BASE_URL).rstrip("/")
 REQUEST_TIMEOUT_SECONDS = int(os.getenv("FLOWGUARD_REQUEST_TIMEOUT", "10"))
