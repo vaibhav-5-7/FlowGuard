@@ -223,6 +223,6 @@ streamlit run frontend/streamlit_app.py
 
 ## Author
 
-Vaibhav B. Pande
+Vaibhav B. Panade
 
 Data Engineering Enthusiast
