@@ -1,9 +1,11 @@
 from contextlib import asynccontextmanager
 from typing import Any
 
+
 from fastapi import FastAPI
 
 from app.api.alerts import router as alerts_router
+from app.api.auth import router as auth_router
 from app.api.pipeline_failures import router as pipeline_failures_router
 from app.api.pipeline_health import router as pipeline_health_router
 from app.api.pipeline_runs import router as pipeline_runs_router
@@ -47,6 +49,8 @@ app = FastAPI(
     lifespan=lifespan,
     openapi_tags=OPENAPI_TAGS,
 )
+
+app.include_router(auth_router)
 
 app.include_router(pipelines_router)
 app.include_router(pipeline_runs_router)

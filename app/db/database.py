@@ -29,6 +29,6 @@ def get_db() -> Generator[Session, None, None]:
 
 def create_tables() -> None:
     """Create all tables defined by ORM models."""
-    from app.models import alert, pipeline  # noqa: F401
+    from app.models import alert, pipeline, user
 
     Base.metadata.create_all(bind=engine)

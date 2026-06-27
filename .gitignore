@@ -30,3 +30,6 @@ htmlcov/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local database
+flowguard.db
